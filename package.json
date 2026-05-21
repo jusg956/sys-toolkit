@@ -5,90 +5,9 @@
   "description": "系统监控与工具箱 - System Info Viewer & Toolkit",
   "author": "jusg956",
   "license": "MIT",
-  "main": "dist-electron/main.js",
+  "main": "dist-electron/main.cjs",
   "type": "module",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:client": "vite",
-    "dev:server": "tsx watch server/index.ts",
-    "dev:electron": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"electron .\"",
-    "build": "npm run build:frontend && npm run build:backend && npm run build:electron",
-    "build:frontend": "vite build",
-    "build:backend": "node esbuild.backend.mjs",
-    "build:electron": "tsc -p electron/tsconfig.json",
-    "build:app": "npm run build && electron-builder --win",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "systeminformation": "^5.31.6"
-  },
-  "devDependencies": {
-    "@ant-design/icons": "^6.2.3",
-    "@eslint/js": "^10.0.1",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/node": "^24.12.3",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "antd": "^6.4.3",
-    "concurrently": "^9.2.1",
-    "cors": "^2.8.6",
-    "electron": "^35.0.0",
-    "electron-builder": "^26.0.0",
-    "esbuild": "^0.25.0",
-    "eslint": "^10.3.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "express": "^5.2.1",
-    "globals": "^17.6.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1",
-    "tsx": "^4.22.3",
-    "typescript": "~6.0.2",
-    "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12",
-    "xlsx": "^0.18.5",
-    "zustand": "^5.0.13"
-  },
-  "build": {
-    "appId": "com.systoolkit.app",
-    "productName": "SysToolkit",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
-      "node_modules/systeminformation/**/*",
-      "!node_modules/systeminformation/.git/**",
-      "!node_modules/systeminformation/src/**",
-      "!**/*.ts",
-      "!**/*.map"
-    ],
-    "asar": true,
-    "asarUnpack": [
-      "node_modules/systeminformation/**/*"
-    ],
-    "extraResources": [
-      {
-        "from": "dist",
-        "to": "frontend"
-      },
-      {
-        "from": "dist-electron/backend",
-        "to": "backend"
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "dir",
-          "arch": ["x64"]
-        }
-      ]
-    }
   }
 }
