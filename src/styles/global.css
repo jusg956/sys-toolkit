@@ -1,0 +1,281 @@
+:root {
+  --bg-deep: #080C18;
+  --bg-card: rgba(26, 39, 68, 0.6);
+  --bg-card-hover: rgba(26, 39, 68, 0.85);
+  --bg-sidebar: #0E1525;
+  --accent: #00D4FF;
+  --accent-dim: rgba(0, 212, 255, 0.15);
+  --accent-glow: rgba(0, 212, 255, 0.4);
+  --success: #00E676;
+  --warning: #FF6B35;
+  --error: #FF3366;
+  --text-primary: #E0E6ED;
+  --text-secondary: #6B7B94;
+  --text-muted: #3D4F6F;
+  --border: rgba(0, 212, 255, 0.12);
+  --border-active: rgba(0, 212, 255, 0.35);
+  --font-data: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-ui: 'DM Sans', 'Microsoft YaHei', -apple-system, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+}
+
+body {
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* 内容区 */
+.content-scroll {
+  overflow-y: auto;
+  height: 100%;
+  padding: 28px 32px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* HUD 卡片 */
+.hud-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+.hud-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+}
+.hud-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.06);
+}
+
+/* HUD 卡片标题 */
+.hud-card-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hud-card-title .icon {
+  color: var(--accent);
+  font-size: 14px;
+}
+
+/* 数据大数字 */
+.data-value {
+  font-family: var(--font-data);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.data-value.accent {
+  color: var(--accent);
+}
+.data-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.data-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+/* HUD 进度条 */
+.hud-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.hud-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), #00A8CC);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transition: width 0.6s ease;
+}
+.hud-progress-bar.warning {
+  background: linear-gradient(90deg, var(--warning), #FF8F5E);
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
+}
+.hud-progress-bar.danger {
+  background: linear-gradient(90deg, var(--error), #FF6B8A);
+  box-shadow: 0 0 8px rgba(255, 51, 102, 0.4);
+}
+
+/* SVG 环形进度条 */
+.ring-progress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ring-progress .ring-text {
+  position: absolute;
+  font-family: var(--font-data);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.ring-progress svg {
+  transform: rotate(-90deg);
+}
+.ring-progress .ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+}
+.ring-progress .ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+  filter: drop-shadow(0 0 4px var(--accent-glow));
+}
+
+/* 描述列表 */
+.hud-desc {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  font-size: 13px;
+}
+.hud-desc dt {
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.hud-desc dd {
+  color: var(--text-primary);
+  font-family: var(--font-data);
+  font-size: 13px;
+}
+
+/* 响应式网格 */
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid-4 { grid-template-columns: 1fr; }
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1000px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 4px var(--accent-glow); }
+  50% { box-shadow: 0 0 12px var(--accent-glow); }
+}
+
+/* Ant Design 暗色覆盖 */
+.ant-layout {
+  background: var(--bg-deep) !important;
+}
+.ant-layout-sider {
+  background: var(--bg-sidebar) !important;
+}
+.ant-menu-dark {
+  background: transparent !important;
+}
+.ant-menu-dark .ant-menu-item-selected {
+  background: rgba(0, 212, 255, 0.1) !important;
+}
+.ant-menu-dark .ant-menu-item {
+  color: var(--text-secondary) !important;
+}
+.ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon,
+.ant-menu-dark .ant-menu-item-selected .anticon {
+  color: var(--accent) !important;
+}
+.ant-tabs .ant-tabs-tab {
+  color: var(--text-secondary) !important;
+}
+.ant-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--accent) !important;
+}
+.ant-tabs .ant-tabs-ink-bar {
+  background: var(--accent) !important;
+}
+.ant-input-number {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.ant-input-number:hover,
+.ant-input-number-focused {
+  border-color: var(--accent) !important;
+}
+.ant-input-number input {
+  color: var(--text-primary) !important;
+}
+.ant-message .ant-message-notice-content {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
