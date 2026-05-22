@@ -176,6 +176,12 @@ export default function Dashboard() {
                   <div style={{ fontSize: 12, color: '#6B7B94' }}>
                     可用 {formatBytes(snapshot.memory.free)}
                   </div>
+                  {snapshot.memory.dimmModules && snapshot.memory.dimmModules.length > 0 && (() => {
+                    const types = [...new Set(snapshot.memory.dimmModules.map(d => d.memoryType).filter(Boolean))];
+                    const speeds = [...new Set(snapshot.memory.dimmModules.map(d => d.speed).filter(s => s > 0))];
+                    const summary = [...types, speeds.length ? `${Math.max(...speeds)} MHz` : '', `× ${snapshot.memory.dimmModules.length}`].filter(Boolean).join(' ');
+                    return summary ? <div style={{ fontSize: 12, color: '#6B7B94' }}>{summary}</div> : null;
+                  })()}
                 </div>
                 <RingProgress
                   percent={snapshot.memory.usedPercent}
@@ -198,7 +204,7 @@ export default function Dashboard() {
                     {g.model}
                   </div>
                   <div style={{ fontSize: 12, color: '#6B7B94' }}>
-                    {g.vendor} / {formatBytes(g.vram * 1024 * 1024)} 显存
+                    {g.vendor} / {formatBytes(g.vram)} 显存
                   </div>
                   {g.driverVersion && (
                     <div style={{ fontSize: 12, color: '#3D4F6F', marginTop: 2 }}>

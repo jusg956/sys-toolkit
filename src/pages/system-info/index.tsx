@@ -157,7 +157,7 @@ export default function SystemInfo() {
         {/* 内存 */}
         <div className="hud-card" style={{ display: 'flex', alignItems: 'center', gap: 24, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 12, right: 16 }}>
-            <CopyButton getText={() => `总内存: ${formatBytes(memory.total)}\n已使用: ${formatBytes(memory.used)}\n可用: ${formatBytes(memory.free)}\n使用率: ${memory.usedPercent.toFixed(1)}%${memory.swapTotal > 0 ? `\n虚拟内存: ${formatBytes(memory.swapUsed)} / ${formatBytes(memory.swapTotal)}` : ''}`} />
+            <CopyButton getText={() => `总内存: ${formatBytes(memory.total)}\n已使用: ${formatBytes(memory.used)}\n可用: ${formatBytes(memory.free)}\n使用率: ${memory.usedPercent.toFixed(1)}%${memory.swapTotal > 0 ? `\n虚拟内存: ${formatBytes(memory.swapUsed)} / ${formatBytes(memory.swapTotal)}` : ''}${memory.dimmModules?.length ? '\n' + memory.dimmModules.map(d => `${d.locator}  ${d.partNumber || d.manufacturer || '-'}  ${formatBytes(d.size)}  ${d.speed > 0 ? d.speed + ' MHz' : ''}  ${d.memoryType}`).join('\n') : ''}`} />
           </div>
           <RingProgress
             percent={memory.usedPercent}
@@ -181,6 +181,19 @@ export default function SystemInfo() {
                 </>
               )}
             </dl>
+            {memory.dimmModules && memory.dimmModules.length > 0 && (
+              <div style={{ marginTop: 8, fontSize: 12, color: '#8B9DC3' }}>
+                {memory.dimmModules.map((d, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '2px 0' }}>
+                    <span style={{ color: '#6B7B94', minWidth: 60 }}>{d.locator}</span>
+                    <span style={{ color: '#C0CCDD', minWidth: 140 }}>{d.partNumber || d.manufacturer || '-'}</span>
+                    <span>{formatBytes(d.size)}</span>
+                    <span>{d.speed > 0 ? `${d.speed} MHz` : ''}</span>
+                    <span style={{ color: '#6B7B94' }}>{d.memoryType}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -228,7 +241,7 @@ export default function SystemInfo() {
               </div>
               <CopyButton getText={() => {
                 const lines = [`型号: ${g.model}`, `厂商: ${g.vendor}`]
-                if (g.vram > 0) lines.push(`显存: ${formatBytes(g.vram * 1024 * 1024)}`)
+                if (g.vram > 0) lines.push(`显存: ${formatBytes(g.vram)}`)
                 lines.push(`驱动: ${g.driverVersion || '-'}`)
                 gpu.displays.forEach((d, di) => {
                   lines.push(`\n显示器${gpu.displays.length > 1 ? ` ${di + 1}` : ''}: ${d.monitorName || d.model || '未知'}`)
@@ -246,7 +259,7 @@ export default function SystemInfo() {
                 </div>
                 <dl className="hud-desc">
                   <dt>厂商</dt><dd>{g.vendor}</dd>
-                  {g.vram > 0 && <><dt>显存</dt><dd>{formatBytes(g.vram * 1024 * 1024)}</dd></>}
+                  {g.vram > 0 && <><dt>显存</dt><dd>{formatBytes(g.vram)}</dd></>}
                   <dt>驱动</dt><dd>{g.driverVersion || '-'}</dd>
                 </dl>
               </div>
@@ -365,7 +378,7 @@ export default function SystemInfo() {
                     {iface.mac && <><dt>MAC</dt><dd>{iface.mac}</dd></>}
                     {iface.speed > 0 && <><dt>速度</dt><dd>{iface.speed} Mbps</dd></>}
                     {iface.dhcp && <><dt>DHCP</dt><dd>是</dd></>}
-                    {stat && stat.rx_sec > 0 && (
+                    {stat && (
                       <><dt>实时速率</dt><dd>↓ {formatBytes(stat.rx_sec)}/s  ↑ {formatBytes(stat.tx_sec)}/s</dd></>
                     )}
                     {stat && (

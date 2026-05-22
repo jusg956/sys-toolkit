@@ -1,8 +1,16 @@
+import { invoke } from '@tauri-apps/api/core'
+
 declare global {
   interface Window {
-    electronAPI?: { platform: string }
+    __TAURI__?: unknown
+    __TAURI_INTERNALS__?: unknown
   }
 }
 
-const isElectron = !!window.electronAPI
-export const API_BASE = isElectron ? 'http://localhost:3001' : ''
+export function isTauri(): boolean {
+  return !!window.__TAURI_INTERNALS__
+}
+
+export async function tauriInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  return invoke<T>(cmd, args)
+}

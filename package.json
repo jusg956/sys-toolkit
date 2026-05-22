@@ -5,9 +5,33 @@
   "description": "系统监控与工具箱 - System Info Viewer & Toolkit",
   "author": "jusg956",
   "license": "MIT",
-  "main": "dist-electron/main.cjs",
   "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:tauri": "tauri dev",
+    "build": "vite build",
+    "build:tauri": "tauri build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "systeminformation": "^5.31.6"
+    "@ant-design/icons": "^6.2.3",
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "antd": "^6.4.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
   }
 }

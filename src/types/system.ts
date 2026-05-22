@@ -11,6 +11,15 @@ export interface CpuInfo {
   usage: number
 }
 
+export interface DimmModule {
+  locator: string
+  manufacturer: string
+  partNumber: string
+  size: number
+  speed: number
+  memoryType: string
+}
+
 export interface MemoryInfo {
   total: number
   used: number
@@ -19,6 +28,7 @@ export interface MemoryInfo {
   swapTotal: number
   swapUsed: number
   swapFree: number
+  dimmModules: DimmModule[]
 }
 
 export interface DiskLayout {

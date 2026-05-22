@@ -1,8 +1,9 @@
 import * as XLSX from 'xlsx'
 import type { SystemSnapshot } from '../types/system'
 import { formatBytes, formatUptime } from './format'
+import { isTauri } from './api'
 
-export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
+export async function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
   const wb = XLSX.utils.book_new()
 
   const rows: (string | number)[][] = []
@@ -36,6 +37,12 @@ export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
     kv('虚拟内存总量', formatBytes(snapshot.memory.swapTotal))
     kv('虚拟内存已用', formatBytes(snapshot.memory.swapUsed))
   }
+  snapshot.memory.dimmModules?.forEach(d => {
+    kv(`${d.locator} 型号`, d.partNumber || d.manufacturer || '-')
+    kv(`${d.locator} 容量`, formatBytes(d.size))
+    if (d.speed > 0) kv(`${d.locator} 频率`, `${d.speed} MHz`)
+    if (d.memoryType) kv(`${d.locator} 类型`, d.memoryType)
+  })
 
   // GPU
   section('显卡')
@@ -45,7 +52,7 @@ export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
       const label = snapshot.gpu.controllers.filter(c => !c.model.includes('OrayIddDriver')).length > 1 ? `显卡 ${i + 1}` : '显卡'
       kv(`${label} 型号`, g.model)
       kv(`${label} 厂商`, g.vendor)
-      if (g.vram > 0) kv(`${label} 显存`, formatBytes(g.vram * 1024 * 1024))
+      if (g.vram > 0) kv(`${label} 显存`, formatBytes(g.vram))
       kv(`${label} 驱动`, g.driverVersion || '-')
     })
 
@@ -64,7 +71,7 @@ export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
   section('磁盘')
   snapshot.disk.layout.forEach(d => {
     sep()
-    rows.push([d.name])
+    rows.push([d.vendor ? `${d.vendor} ${d.name}` : d.name])
     kv('类型', d.type)
     kv('接口', d.interfaceType)
     kv('容量', formatBytes(d.size))
@@ -98,7 +105,9 @@ export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
       .forEach(iface => {
         sep()
         rows.push([iface.ifaceName || iface.iface])
+        if (iface.type) kv('类型', iface.type)
         if (iface.ip4) kv('IPv4', iface.ip4)
+        if (iface.ip6) kv('IPv6', iface.ip6)
         if (iface.mac) kv('MAC', iface.mac)
         if (iface.speed > 0) kv('速度 (Mbps)', iface.speed)
         kv('DHCP', iface.dhcp ? '是' : '否')
@@ -116,5 +125,27 @@ export function exportSystemInfoXlsx(snapshot: SystemSnapshot) {
   XLSX.utils.book_append_sheet(wb, ws, '系统信息')
 
   const date = new Date().toISOString().slice(0, 10)
-  XLSX.writeFile(wb, `SysToolkit_系统信息_${date}.xlsx`)
+  const filename = `SysToolkit_系统信息_${date}.xlsx`
+
+  if (isTauri()) {
+    // Use Tauri native dialog + fs
+    const { save } = await import('@tauri-apps/plugin-dialog')
+    const { writeTextFile } = await import('@tauri-apps/plugin-fs')
+
+    const filePath = await save({
+      defaultPath: filename,
+      filters: [{ name: 'Excel', extensions: ['xlsx'] }],
+    })
+
+    if (filePath) {
+      const data = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' })
+      // writeBinaryFile is not available in plugin-fs, use writeTextFile with base64
+      // Actually we need to use the Rust command for binary write
+      const { invoke } = await import('@tauri-apps/api/core')
+      await invoke('export_xlsx', { path: filePath, data })
+    }
+  } else {
+    // Fallback for web dev mode
+    XLSX.writeFile(wb, filename)
+  }
 }

@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { SystemSnapshot } from '../types/system'
-import { API_BASE } from '../utils/api'
+import { isTauri, tauriInvoke } from '../utils/api'
+
+const API_BASE = 'http://localhost:3001'
 
 interface LiveData {
   cpu: { usage: number }
@@ -36,9 +38,14 @@ export const useSystemInfoStore = create<SystemInfoState>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
-      const res = await fetch(`${API_BASE}/api/snapshot`)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data: SystemSnapshot = await res.json()
+      let data: SystemSnapshot
+      if (isTauri()) {
+        data = await tauriInvoke<SystemSnapshot>('get_snapshot')
+      } else {
+        const res = await fetch(`${API_BASE}/api/snapshot`)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        data = await res.json()
+      }
       set({ snapshot: data, loading: false, lastFetch: Date.now() })
     } catch (err) {
       set({ error: String(err), loading: false })
@@ -82,9 +89,14 @@ export const useSystemInfoStore = create<SystemInfoState>((set, get) => ({
 
     const fetchLive = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/live`)
-        if (!res.ok) return
-        const data: LiveData = await res.json()
+        let data: LiveData
+        if (isTauri()) {
+          data = await tauriInvoke<LiveData>('get_live')
+        } else {
+          const res = await fetch(`${API_BASE}/api/live`)
+          if (!res.ok) return
+          data = await res.json()
+        }
         get().applyLive(data)
       } catch { /* ignore */ }
     }

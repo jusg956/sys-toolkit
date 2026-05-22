@@ -6,13 +6,13 @@
 
 ### 系统信息
 - **CPU**：型号、厂商、核心/线程数、频率、实时使用率
-- **内存**：总量、已用、可用、使用率、虚拟内存
+- **内存**：总量、已用、可用、使用率、虚拟内存、内存条型号/频率/类型
 - **显卡**：型号、厂商、显存、驱动版本
-- **显示器**：型号、分辨率、刷新率（支持多显示器）
-- **磁盘**：物理硬盘型号、接口类型、分区使用情况
+- **显示器**：型号、分辨率、刷新率（支持多显示器，通过 SetupDi API 获取真实名称）
+- **磁盘**：物理硬盘型号（如 WD Blue SN580 1TB）、分区使用情况
 - **主板**：制造商、型号、版本
-- **操作系统**：发行版、版本、内核、架构、主机名、运行时间
-- **网络**：网卡名称、IPv4、MAC、速度、DHCP、实时速率、累计流量
+- **操作系统**：发行版、版本号、内核、架构、主机名、运行时间
+- **网络**：网卡名称、IPv4、MAC、速度、实时速率、累计流量
 
 ### 实时刷新
 - CPU 使用率、内存使用率、网络速率每 2 秒自动更新
@@ -36,9 +36,8 @@
 | 层 | 技术 |
 |---|---|
 | 前端 | React 19 + TypeScript + Vite + Ant Design 5 + Zustand |
-| 后端 | Node.js + Express + systeminformation |
-| 桌面端 | Electron 35 |
-| 打包 | electron-builder |
+| 后端 | Rust (Tauri 2) + sysinfo + nvml-wrapper + smbios-lib + netdev |
+| 桌面端 | Tauri 2.11 (WebView2, ~5MB 安装包) |
 
 ## 开发
 
@@ -46,51 +45,56 @@
 # 安装依赖
 npm install
 
-# 网页版开发（前端 + 后端热重载）
-npm run dev
-# 访问 http://localhost:5173
-
-# Electron 开发模式
-npm run dev:electron
+# Tauri 开发模式（前端热重载 + Rust 后端）
+npm run dev:tauri
 ```
 
 ## 构建
 
 ```bash
-# 构建前端 + 后端 + Electron 主进程
-npm run build
-
-# 打包为 Windows 桌面应用
-npm run build:app
-# 产物在 release/win-unpacked/SysToolkit.exe
+# 构建 Windows 桌面应用
+npx tauri build
+# 产物在 src-tauri/target/release/bundle/
+#   msi/SysToolkit_1.0.0_x64_en-US.msi
+#   nsis/SysToolkit_1.0.0_x64-setup.exe
 ```
 
 ## 项目结构
 
 ```
 sys-toolkit/
-├── electron/           # Electron 主进程
-│   ├── main.ts         # 窗口管理 + 后端子进程
-│   └── preload.ts      # 预加载脚本
-├── server/             # Express 后端
-│   └── index.ts        # API 端点
-├── src/                # React 前端
-│   ├── components/     # 组件
-│   ├── pages/          # 页面
-│   ├── stores/         # Zustand 状态管理
-│   ├── styles/         # 全局样式 + 主题
-│   ├── types/          # TypeScript 类型
-│   └── utils/          # 工具函数
-├── esbuild.backend.mjs # 后端打包配置
+├── src-tauri/              # Tauri 后端 (Rust)
+│   ├── src/
+│   │   ├── commands/       # 系统信息采集模块
+│   │   │   ├── cpu.rs      # CPU 信息
+│   │   │   ├── memory.rs   # 内存 + DIMM 信息 (SMBIOS)
+│   │   │   ├── gpu.rs      # 显卡信息 (NVML)
+│   │   │   ├── display.rs  # 显示器信息 (SetupDi API)
+│   │   │   ├── disk.rs     # 磁盘信息 (sysinfo + PowerShell)
+│   │   │   ├── motherboard.rs  # 主板信息 (SMBIOS)
+│   │   │   ├── os.rs       # 操作系统信息 (注册表)
+│   │   │   └── network.rs  # 网络信息 (netdev + sysinfo)
+│   │   ├── types.rs        # 数据结构定义
+│   │   ├── lib.rs          # Tauri 命令注册
+│   │   └── main.rs         # 入口
+│   ├── Cargo.toml          # Rust 依赖
+│   └── tauri.conf.json     # Tauri 配置
+├── src/                    # React 前端
+│   ├── components/         # 通用组件
+│   ├── pages/              # 页面（仪表盘、系统信息、计时器）
+│   ├── stores/             # Zustand 状态管理
+│   ├── styles/             # 全局样式 + 主题
+│   ├── types/              # TypeScript 类型
+│   └── utils/              # 工具函数
 └── package.json
 ```
 
-## API 端点
+## 历史版本
 
-| 端点 | 说明 | 缓存 |
+| 版本 | 架构 | 说明 |
 |------|------|------|
-| `GET /api/snapshot` | 全量系统信息 | 5s |
-| `GET /api/live` | 动态数据（CPU/内存/网络/磁盘/运行时间） | 1.5s |
+| v1.0.0 | Electron + Node.js + Express | 初始版本，`git checkout v1.0.0-electron` |
+| v2.0.0 | Tauri 2 + Rust | Rust 后端重写，安装包 ~5MB（原 Electron ~200MB） |
 
 ## 许可
 
